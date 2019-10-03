@@ -28,6 +28,18 @@
 </template>
 
 <script>
+const ffi = require("ffi");
+
+// This is entirely untested, and cobbled together from a couple of StackOverflow posts.
+var user32 = new ffi.Library("user32", {
+  FindWindowA: ["long", ["string", "string"]], // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-findwindowa
+  PostMessageA: ["int32", ["long", "int32", "long", "int32"]] // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-postmessagea
+});
+
+const WM_KEYDOWN = 0x0100; // https://docs.microsoft.com/en-au/windows/win32/inputdev/wm-keydown
+const WM_KEYUP = 0x0101; // https://docs.microsoft.com/en-au/windows/win32/inputdev/wm-keyup
+const VK_F1 = 0x70; // https://docs.microsoft.com/en-au/windows/win32/inputdev/virtual-key-codes
+
 export default {
   name: "Knocker",
   data() {
@@ -54,6 +66,12 @@ export default {
         }, 4000);
         this.value = false;
         this.$emit("knock");
+
+        // FIXME: Make this a separate function that gets triggered by the emit()
+        // FIXME: There is no error handling here at all. What happens if steamvr_knockknock can't be found?
+        var steamvr_knockknock = user32.FindWindowA(NULL, "Want my attention?");
+        user32.PostMessageA(steamvr_knockknock, WM_KEYDOWN, VK_F1, 0);
+        user32.PostMessageA(steamvr_knockknock, WM_KEYUP, VK_F1, 0);
       }
     },
     endKnock() {
