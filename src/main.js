@@ -35,12 +35,16 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.setAppDetails({
-    appId: APP_ID,
-    appIconPath: icon,
-    relaunchCommand: app.getPath("exe"),
-    relaunchDisplayName: "VR Stopwatch"
-  });
+  if (process.platform === "win32") {
+    // This function is only available on Windows, Mike does dev work on Linux.
+    // In production this will only ever run on Windows, so we don't care to find the Mac/Linux alternatives and fix it.
+    mainWindow.setAppDetails({
+      appId: APP_ID,
+      appIconPath: icon,
+      relaunchCommand: app.getPath("exe"),
+      relaunchDisplayName: "VR Stopwatch"
+    });
+  }
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
